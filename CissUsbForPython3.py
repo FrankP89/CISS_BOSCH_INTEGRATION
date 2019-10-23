@@ -362,8 +362,9 @@ def check_payload(payload):
 
 def conv_data(data):
     a = []
-    for ind in range(len(data)):
-        a.insert(ind, ord(data[ind]))
+    datastr = data.decode(encoding="ISO-8859-1");
+    for ind in range(len(datastr)):
+        a.insert(ind, ord(datastr[ind]))
     return a
 
 # Simple filename change to have every n time a new csv file
@@ -376,18 +377,28 @@ def write_to_csv(id, buff, tstamp):
     dataFileLocation = "./data/" + getTimeStringForNewFile() + 'dataStream.csv'
     if len(buff) < 14:
         return
+    try:
+        if not os.path.exists(dataFileLocation):
+            with open(dataFileLocation, "wb") as csvOpen:
+                csvobj = csv.writer(csvOpen, dialect='excel')
+                csvobj.writerow([" id ", " timestamp ", " ax ", " ay ", " az ",
+                                 " gx ", " gy ", " gz ", " mx ", " my ", " mz ",
+                                 " t ", " p ", " h ", " l ", " n "])
 
-    if not os.path.exists(dataFileLocation):
-        with open(dataFileLocation, "wb") as csvOpen:
+        with open(dataFileLocation, "a") as csvOpen:
             csvobj = csv.writer(csvOpen, dialect='excel')
-            csvobj.writerow([" id ", " timestamp ", " ax ", " ay ", " az ",
-                             " gx ", " gy ", " gz ", " mx ", " my ", " mz ",
-                             " t ", " p ", " h ", " l ", " n "])
+            csvobj.writerow([id, tstamp, buff[0], buff[1], buff[2], buff[3], buff[4], buff[5], buff[6],buff[7], buff[8], buff[9], buff[10], buff[11], buff[12], buff[13]])
+            if printInformation: print((id, tstamp, buff[0], buff[1], buff[2], buff[3], buff[4], buff[5],buff[6], buff[7], buff[8], buff[9], buff[10], buff[11], buff[12], buff[13]))
 
-    with open(dataFileLocation, "a") as csvOpen:
-        csvobj = csv.writer(csvOpen, dialect='excel')
-        csvobj.writerow([id, tstamp, buff[0], buff[1], buff[2], buff[3], buff[4], buff[5], buff[6],buff[7], buff[8], buff[9], buff[10], buff[11], buff[12], buff[13]])
-        if printInformation: print((id, tstamp, buff[0], buff[1], buff[2], buff[3], buff[4], buff[5],buff[6], buff[7], buff[8], buff[9], buff[10], buff[11], buff[12], buff[13]))
+    except Exception as e:  # Checking that the "bytes-like object, not str" exception is not raised randomly
+        print("Some data lost...");
+        node.stream()
+
+    except KeyboardInterrupt as e:
+        if printInformation: print("User stopped")
+        node.disconnect()
+        time.sleep(1)
+        exit(0)
 
 def write_to_csv_event(id, event, tstamp):
     global dataFileLocationEvent
@@ -487,8 +498,8 @@ class CISSNode:
             sIRConf.set("sensorcfg", "noise_event", "false")
             sIRConf.set("sensorcfg", "noise_threshold", "0")
             sIRConf.set("sensorcfg", "period_env_us", "1000000")
-            #sIRConf.set("sensorcfg", "port", "/dev/ttyACM0")
-            sIRConf.set("sensorcfg", "port", "COM82")
+            # sIRConf.set("sensorcfg", "port", "/dev/ttyACM0") # For Linux
+            sIRConf.set("sensorcfg", "port", "COM82") # For Windows
 
             with open(iniFileLocation, "w") as newcfgfile:
                 sIRConf.write(newcfgfile)
@@ -592,7 +603,7 @@ class CISSNode:
     def stream(self):
         global out
     
-        sof = b"\xfe" #.decode(encoding="ISO-8859-1")
+        sof = b"\xfe" # decode(encoding="ISO-8859-1") - Strange encoding method
 
         data = []
         sub_payload = []
@@ -604,14 +615,12 @@ class CISSNode:
             while not out == sof:
                 out = sr.read()
 
-
             length = sr.read()
             if length:
                 length = ord(length)
             else:
                 continue
             buffer = sr.read(length+1)
-            print(buffer)
             payload = conv_data(buffer)
             payload.insert(0, length)
             out = ""
@@ -666,8 +675,14 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception as e: 
-        if printInformation: print("disconnected")
+    except Exception as e:
+        if printInformation: print("Disconnected")
+        node.disconnect()
+        time.sleep(1)
+        exit(0)
+
+    except KeyboardInterrupt as e:
+        if printInformation: print("User stopped")
         node.disconnect()
         time.sleep(1)
         exit(0)
