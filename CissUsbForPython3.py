@@ -77,35 +77,84 @@
 # Special operation mode "Statistical Operation Mode" is not implemented yet.  
 #
 
-import serial, signal, configparser, os, csv, time, sys
-import CISS_Modbus as CISS_COMM
+import serial, signal, configparser, os, csv, time, sys, struct
 from multiprocessing.pool import ThreadPool
 from threading import Thread, Lock
+from pyModbusTCP.client import ModbusClient
+from pyModbusTCP.server import ModbusServer
 
 SERVER_HOST = "localhost"
 SERVER_PORT = 502
+
+# Flag for connection, initial state => down
+is_modbus_server_up = False
+is_modbus_client_up = False
+
+# Define initial reconnection time (in seconds)
+reconnecting_time = 1
 
 # establish modbus tcp server
 # start server thread
 pool = ThreadPool(processes=3)
 
+
+
+def start_modbus_server(hostIP, portN):
+    try:
+        # start modbus server
+        server = ModbusServer(host=hostIP, port=portN)
+        # start modbus server
+        server.start()
+
+        # flag up
+        is_modbus_server_up = True
+        print("Server up and running!")
+        return server
+
+    except:
+        print("Server not available ... trying to connect ...")
+        start_modbus_server('localhost', SERVER_PORT)
+        time.sleep(reconnecting_time)
+        # increase a second if fails to
+        reconnecting_time = reconnecting_time + 1
+
 # start server thread
-ts = Thread(target=CISS_COMM.start_modbus_server, args=(SERVER_HOST,SERVER_PORT), name='thread_server_function')
-#async_ts = pool.apply_async(CISS_COMM.start_modbus_server, (SERVER_HOST, SERVER_PORT))
-#modbus_server = async_ts.get()
+ts = Thread(target=start_modbus_server, args=(SERVER_HOST,SERVER_PORT), name='thread_server_function')
+ts.daemon = True
 ts.start()
+        
+#async_ts = pool.apply_async(start_modbus_server, (SERVER_HOST, SERVER_PORT))
+#modbus_server = async_ts.get()
+
 
 # init a thread lock
 regs_lock = Lock()
 
 #tc = Thread(target=CISS_COMM.start_modbus_client, args=(SERVER_HOST, SERVER_PORT), name='thread_server_function')
+#tc.daemon = True
+#tc.start()
 #async_tc = pool.apply_async(CISS_COMM.start_modbus_client, (SERVER_HOST, SERVER_PORT))
 #modbus_client = async_tc.get()
-modbus_client = CISS_COMM.start_modbus_client(SERVER_HOST, SERVER_PORT)
+
+try:
+    modbus_client = ModbusClient(host=SERVER_HOST, port=SERVER_PORT, auto_open=True)
+    #c.debug(True)
+except ValueError:
+    print("Error with host or port params")
 
 time.sleep(1)
 #tc.start()
 #tc.join()
+
+holding_registers = []
+input_registers = []
+coils = 0
+discrete_inputs = 0
+
+holding_registers_lock = Lock()
+input_registers_lock = Lock()
+coils_lock = Lock()
+discrete_inputs_lock = Lock()
 
 
 
@@ -404,7 +453,7 @@ def getTimeStringForNewFile():
 
 # simple helper to write sensor data to a csv file
 def write_to_csv(id, buff, tstamp):
-
+        
     dataFileLocation = "./data/" + getTimeStringForNewFile() + 'dataStream.csv'
     if len(buff) < 14:
         return
@@ -420,39 +469,9 @@ def write_to_csv(id, buff, tstamp):
             csvobj = csv.writer(csvOpen, dialect='excel')
             csvobj.writerow([id, tstamp, buff[0], buff[1], buff[2], buff[3], buff[4], buff[5], buff[6],buff[7], buff[8], buff[9], buff[10], buff[11], buff[12], buff[13]]) # Disable saving of data
             if printInformation: print((id, tstamp, buff[0], buff[1], buff[2], buff[3], buff[4], buff[5],buff[6], buff[7], buff[8], buff[9], buff[10], buff[11], buff[12], buff[13]))
-            ba2 = bytes(str(value), 'utf-8')
+            
 
-
-            # Accelerometer
-            modbus_client.write_single_register(100, buff[0])
-            #acc[1] = modbus_client.write_single_register(101, buff[1])
-            #acc[2] = modbus_client.write_single_register(102, buff[2])
-            # Gyroscope
-            #modbus_client.write_single_register(103, buff[3])
-            #modbus_client.write_single_register(104, buff[4])
-            #modbus_client.write_single_register(105, buff[5])
-            # Magnetometer
-            #modbus_client.write_single_register(106, buff[6])
-            #modbus_client.write_single_register(107, buff[7])
-            #modbus_client.write_single_register(108, buff[8])
-            # Temperature
-            #modbus_client.write_single_register(109, buff[9])
-            # Pressure
-            #modbus_client.write_single_register(110, buff[10])
-            # Humidity
-            #modbus_client.write_single_register(111, buff[11])
-            # Light
-            #modbus_client.write_single_register(112, buff[12])
-            # Acoustic - Noise
-            #modbus_client.write_single_register(113, buff[13])
-
-            #modbus_client.write_single_register(240, buff[14])
-
-
-            #time.sleep(0.2)
-            print("Modbus registers: ", modbus_client.read_holding_registers(100, 13))
-            #CISS_COMM.polling_client_thread(modbus_client, buff, id, tstamp)  # Exporting data to modbus TCP
-            #CISS_COMM.visualize_data()
+            
 
     except Exception as e:  # Checking that the "bytes-like object, not str" exception is not raised randomly
         print("Some data lost...");
@@ -475,6 +494,54 @@ def write_to_csv_event(id, event, tstamp):
         csvobj.writerow([id, tstamp, event])
            
 out = 0
+
+def stream_modbus(id, buff, tstamp):
+        
+        try:
+            
+            if modbus_client.is_open():                               
+                # Accelerometer
+                #modbus_client.write_single_register(100, buff[0])
+                #modbus_client.write_single_register(101, buff[1])
+                #modbus_client.write_single_register(102, buff[2])
+                # Gyroscope
+                #modbus_client.write_single_register(103, buff[3])
+                #modbus_client.write_single_register(104, buff[4])
+                #modbus_client.write_single_register(105, buff[5])
+                # Magnetometer
+                #modbus_client.write_single_register(106, buff[6])
+                #modbus_client.write_single_register(107, buff[7])
+                #modbus_client.write_single_register(108, buff[8])
+                # Temperature
+                modbus_client.write_single_register(109, buff[9])
+                # Pressure
+                #modbus_client.write_single_register(110, buff[10])
+                # Humidity
+                #modbus_client.write_single_register(111, buff[11])
+                # Light
+                #modbus_client.write_single_register(112, buff[12])
+                # Acoustic - Noise
+                #modbus_client.write_single_register(113, buff[13])
+            
+                #modbus_client.write_single_register(240, buff[14])
+            
+            else:
+                modbus_client.open()
+                    
+  
+            
+            
+    
+    
+            #time.sleep(0.2)
+            print("Modbus registers: ", modbus_client.read_holding_registers(100, 13))
+            #CISS_COMM.polling_client_thread(modbus_client, buff, id, tstamp)  # Exporting data to modbus TCP
+            #CISS_COMM.visualize_data()
+            
+        except Exception as e:  # Checking that the "bytes-like object, not str" exception is not raised randomly
+            print("Some data lost...");
+            node.stream()
+
 
 class CISSNode:
     def __init__(self):
@@ -659,10 +726,14 @@ class CISSNode:
             payload.pop(0)
             if t >= 0:
                     mask = self.sensorlist[t].parse(payload[0:self.sensorlist[t].data_length])
-                    write_to_csv(self.sensorid, mask, int(time.time()*1000))
+                    stream_modbus(self.sensorid, mask, int(time.time()*1000))
+                    #write_to_csv(self.sensorid, mask, int(time.time()*1000))
                     payload = payload[self.sensorlist[t].data_length:]
             else:
                 break
+        
+    
+    
 
     def stream(self):
         global out
@@ -727,6 +798,24 @@ class CISSNode:
 
 def ctrl_c_handler(signal, frame,node):
     raise Exception("")
+    
+def stop_modbus_server(server):
+    try:
+        # Flag for connection down
+        is_modbus_server_up = False
+        print("Server stopped.")
+        server.stop()
+    except:
+        print("Server was not connected initially")
+
+def stop_modbus_client(client):
+    try:
+        # Flag for connection down
+        is_modbus_client_up = False
+        print("Client stopped.")
+        client.stop()  
+    except:
+        print("Client was not connected initially")
 
 node = CISSNode()
 
@@ -741,14 +830,14 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         if printInformation: print("Disconnected")
-        CISS_COMM.stop_modbus_server()
+        stop_modbus_client(modbus_client)
         node.disconnect()
         time.sleep(1)
         exit(0)
 
     except KeyboardInterrupt as e:
         if printInformation: print("User stopped")
-        CISS_COMM.stop_modbus_server()
+        stop_modbus_client(modbus_client)
         node.disconnect()
         time.sleep(1)
         exit(0)
