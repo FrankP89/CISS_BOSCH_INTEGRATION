@@ -12,7 +12,7 @@ Allows the utilization of the CISS BOSCH sensor in environments using Python 2 a
 
 - Data streaming with industrial protocol
 
--    |/|_________| 10%
+-    |/|/|/|/|/|_| 85%
 
 - ROS Node
 
