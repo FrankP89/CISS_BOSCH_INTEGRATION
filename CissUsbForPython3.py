@@ -82,6 +82,9 @@ from multiprocessing.pool import ThreadPool
 from threading import Thread, Lock
 from pyModbusTCP.client import ModbusClient
 from pyModbusTCP.server import ModbusServer
+from pymodbus.payload import BinaryPayloadBuilder, Endian
+from pymodbus.payload import BinaryPayloadDecoder, Endian
+
 
 SERVER_HOST = "localhost"
 SERVER_PORT = 502
@@ -95,9 +98,10 @@ reconnecting_time = 1
 
 # establish modbus tcp server
 # start server thread
-pool = ThreadPool(processes=3)
+#pool = ThreadPool(processes=3)
 
-
+# For handling the negative values
+builder = BinaryPayloadBuilder(byteorder=Endian.Big, wordorder=Endian.Big)
 
 def start_modbus_server(hostIP, portN):
     try:
@@ -119,9 +123,9 @@ def start_modbus_server(hostIP, portN):
         reconnecting_time = reconnecting_time + 1
 
 # start server thread
-ts = Thread(target=start_modbus_server, args=(SERVER_HOST,SERVER_PORT), name='thread_server_function')
-ts.daemon = True
-ts.start()
+#ts = Thread(target=start_modbus_server, args=(SERVER_HOST,SERVER_PORT), name='thread_server_function')
+#ts.daemon = True
+#ts.start()
         
 #async_ts = pool.apply_async(start_modbus_server, (SERVER_HOST, SERVER_PORT))
 #modbus_server = async_ts.get()
@@ -137,7 +141,7 @@ regs_lock = Lock()
 #modbus_client = async_tc.get()
 
 try:
-    modbus_client = ModbusClient(host=SERVER_HOST, port=SERVER_PORT, auto_open=True)
+    modbus_client = ModbusClient(host=SERVER_HOST, port=SERVER_PORT, auto_open=True, debug=False)
     #c.debug(True)
 except ValueError:
     print("Error with host or port params")
@@ -369,8 +373,9 @@ class StreamingConfig:
 
     def configure(self, ser, flgSetSamplingRateOnly):
         if ((self.streaming_enabled or flgSetSamplingRateOnly) and self.streaming_period>0):
-            if printInformation_Conf: print(("configure period:",self.streaming_period))
-                       
+            if printInformation_Conf: print("configure period:",self.streaming_period)                      
+           
+            self.streaming_period = int(self.streaming_period)
             conf_buff = bytearray([0xfe, self.cfg_length])
             conf_buff.append(self.cfg_id)
             conf_buff.append(2)
@@ -474,7 +479,7 @@ def write_to_csv(id, buff, tstamp):
             
 
     except Exception as e:  # Checking that the "bytes-like object, not str" exception is not raised randomly
-        print("Some data lost...");
+        #print("Some data lost...");
         node.stream()
 
     except KeyboardInterrupt as e:
@@ -495,52 +500,88 @@ def write_to_csv_event(id, event, tstamp):
            
 out = 0
 
-def stream_modbus(id, buff, tstamp):
-        
+
+def validator(instance, buff):       
+    '''.isError() implemented in pymodbus 1.4.0 and above.'''
+    result = buff
+    decoder = BinaryPayloadDecoder.fromRegisters(instance,byteorder=Endian.Big, wordorder=Endian.Little)
+    for t in range(0, int(len(buff)/2)):
         try:
+            result[t] = d.decode_32bit_float()
+        except:
+            pass
+    return result
+
+    
+
+def stream_modbus(id, buff, tstamp):
+    
+    # Check all the "" signs and replace them with 0s
+    get_indexes = lambda buff, xs: [i for (y, i) in zip(xs, range(len(xs))) if buff == y]
+    indexes = (get_indexes("",buff))
+    
+    for h in indexes:
+        buff[h] = 0
+    
+    # Convert to integer - To include negative values
+    builder.reset() # Reset Old entries
+    for vol in buff:
+        builder.add_32bit_float(vol)
+    unsigned_value = builder.to_registers()   # Convert to int values    
+    
+    
+    try:
+        
+        if modbus_client.is_open():                               
+            ## Multiple register is recommended here
+            modbus_client.write_multiple_registers(100, unsigned_value)
             
-            if modbus_client.is_open():                               
-                # Accelerometer
-                #modbus_client.write_single_register(100, buff[0])
-                #modbus_client.write_single_register(101, buff[1])
-                #modbus_client.write_single_register(102, buff[2])
-                # Gyroscope
-                #modbus_client.write_single_register(103, buff[3])
-                #modbus_client.write_single_register(104, buff[4])
-                #modbus_client.write_single_register(105, buff[5])
-                # Magnetometer
-                #modbus_client.write_single_register(106, buff[6])
-                #modbus_client.write_single_register(107, buff[7])
-                #modbus_client.write_single_register(108, buff[8])
-                # Temperature
-                modbus_client.write_single_register(109, buff[9])
-                # Pressure
-                #modbus_client.write_single_register(110, buff[10])
-                # Humidity
-                #modbus_client.write_single_register(111, buff[11])
-                # Light
-                #modbus_client.write_single_register(112, buff[12])
-                # Acoustic - Noise
-                #modbus_client.write_single_register(113, buff[13])
-            
-                #modbus_client.write_single_register(240, buff[14])
-            
-            else:
-                modbus_client.open()
+            ## Manual register is very limited and not recommended
+            # Accelerometer
+            #modbus_client.write_single_register(100, (buff[0]))
+            #modbus_client.write_single_register(101, (buff[1]))
+            #modbus_client.write_single_register(102, (buff[2]))
+            # Gyrosmodbus_clientope
+            #modbus_client.write_single_register(103, (buff[3]))
+            #modbus_client.write_single_register(104, buff[4])
+            #modbus_client.write_single_register(105, buff[5])
+            # Magnetometer
+            #modbus_client.write_single_register(106, buff[6])
+            #modbus_client.write_single_register(107, buff[7])
+            #modbus_client.write_single_register(108, buff[8])
+            # Temperature
+            #modbus_client.write_single_register(109, buff[9])
+            # Pressure
+            #modbus_client.write_single_register(110, buff[10])
+            # Humidity
+            #modbus_client.write_single_register(111, buff[11])
+            # Light
+            #modbus_client.write_single_register(112, buff[12])
+            # Acoustic - Noise
+            #modbus_client.write_single_register(113, buff[13])
+        
+            #modbus_client.write_single_register(240, buff[14])
+        
+        else:
+            modbus_client.open()
                     
-  
-            
-            
-    
-    
             #time.sleep(0.2)
-            print("Modbus registers: ", modbus_client.read_holding_registers(100, 13))
+                
+        r = modbus_client.read_holding_registers(100, len(unsigned_value))
+        
+        holding_registers = validator(r,buff)
+        
+        print("Modbus registers translated: ", holding_registers)
+        print("Real values: ", buff)
             #CISS_COMM.polling_client_thread(modbus_client, buff, id, tstamp)  # Exporting data to modbus TCP
             #CISS_COMM.visualize_data()
-            
-        except Exception as e:  # Checking that the "bytes-like object, not str" exception is not raised randomly
-            print("Some data lost...");
-            node.stream()
+        time.sleep(0.2)
+        
+    except Exception as e:  # Checking that the "bytes-like object, not str" exception is not raised randomly
+        print("Some data lost...");
+        node.stream()
+        time.sleep(0.1)
+
 
 
 class CISSNode:
@@ -799,14 +840,14 @@ class CISSNode:
 def ctrl_c_handler(signal, frame,node):
     raise Exception("")
     
-def stop_modbus_server(server):
-    try:
-        # Flag for connection down
-        is_modbus_server_up = False
-        print("Server stopped.")
-        server.stop()
-    except:
-        print("Server was not connected initially")
+#def stop_modbus_server(server):
+#    try:
+#        # Flag for connection down
+#        is_modbus_server_up = False
+#        print("Server stopped.")
+#        server.stop()
+#    except:
+#        print("Server was not connected initially")
 
 def stop_modbus_client(client):
     try:
@@ -830,14 +871,14 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         if printInformation: print("Disconnected")
-        stop_modbus_client(modbus_client)
+        #stop_modbus_client(modbus_client)
         node.disconnect()
         time.sleep(1)
         exit(0)
 
     except KeyboardInterrupt as e:
         if printInformation: print("User stopped")
-        stop_modbus_client(modbus_client)
+        #stop_modbus_client(modbus_client)
         node.disconnect()
         time.sleep(1)
         exit(0)

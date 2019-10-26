@@ -3,6 +3,10 @@ from pyModbusTCP.server import ModbusServer
 import time
 import struct
 
+# Define initial reconnection time
+reconnecting_time = 1
+# Flag for connection up
+is_server_up = False
 
 def start_server(hostIP, portN):
     try:
@@ -17,10 +21,11 @@ def start_server(hostIP, portN):
 
     except:
         print("Server not available ... trying to connect ...")
-        start_server('10.217.185.84', 502)
-        time.sleep(reconnecting_time)
         # increase a second if fails to
         reconnecting_time = reconnecting_time + 1
+        start_server('locahost', 502)
+        time.sleep(reconnecting_time)
+        
 
 def stop_server(server):
     try:
@@ -32,10 +37,7 @@ def stop_server(server):
 
 
 if __name__ == '__main__':
-    # Define initial reconnection time
-    reconnecting_time = 1
-    # Flag for connection up
-    is_server_up = False
+    
 
     # Function to start server
-    start_server('10.217.185.84', 502)
+    start_server('localhost', 502)
