@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ciss_imu</name>
+  <version>0.0.0</version>
+  <description>The ciss-bosch sensor package</description>
+
+  <maintainer email="walterpintor@gmail.com">Frank Pintor</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+
+  <build_depend>controller_manager</build_depend>
+  <build_depend>diff_drive_controller</build_depend>
+  <build_depend>gazebo_ros</build_depend>
+  <build_depend>gazebo_ros_control</build_depend>
+  <build_depend>joint_state_controller</build_depend>
+  <build_depend>position_controllers</build_depend>
+  <build_depend>robot_state_publisher</build_depend>
+  <build_depend>rqt_robot_steering</build_depend>
+  <build_depend>rviz</build_depend>
+  <build_depend>xacro</build_depend>
+
+  <build_export_depend>controller_manager</build_export_depend>
+  <build_export_depend>diff_drive_controller</build_export_depend>
+  <build_export_depend>gazebo_ros</build_export_depend>
+  <build_export_depend>gazebo_ros_control</build_export_depend>
+  <build_export_depend>joint_state_controller</build_export_depend>
+  <build_export_depend>position_controllers</build_export_depend>  
+  <build_export_depend>robot_state_publisher</build_export_depend>
+  <build_export_depend>rqt_robot_steering</build_export_depend>
+  <build_export_depend>rviz</build_export_depend>
+  <build_export_depend>xacro</build_export_depend>
+
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>diff_drive_controller</exec_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>gazebo_ros_control</exec_depend>
+  <exec_depend>joint_state_controller</exec_depend>
+  <exec_depend>position_controllers</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rqt_robot_steering</exec_depend>
+  <exec_depend>rviz</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+
+  <export>
+
+  </export>
+</package>

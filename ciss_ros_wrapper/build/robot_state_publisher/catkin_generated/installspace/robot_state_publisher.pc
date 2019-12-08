@@ -1,0 +1,8 @@
+prefix=/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/install
+
+Name: robot_state_publisher
+Description: Description of robot_state_publisher
+Version: 1.14.0
+Cflags: -I/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/install/include -I/opt/ros/melodic/share/orocos_kdl/cmake/../../../include -I/usr/include/eigen3 -I/usr/include
+Libs: -L/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/install/lib -lrobot_state_publisher_solver -ljoint_state_listener /opt/ros/melodic/lib/liborocos-kdl.so.1.4.0
+Requires: roscpp rosconsole rostime tf2_ros tf2_kdl kdl_parser
