@@ -1,19 +1,27 @@
-# CISS_BOSCH_PORT_PYTHON3
+# CISS_BOSCH_PORT_PYTHON
 
 Frank Pintor
 
-23 - 10 - 2019
+10 - 11 - 2019
 
-Allows the utilization of the CISS BOSCH sensor in environments using Python 2 and Python 3.
+Allows the utilization of the CISS BOSCH sensor in ROS environments using Python 2.
 
 
 
 *Future work*
 
-- Data streaming with industrial protocol
+- Correct description for the covariance matrices for IMU
+- Correct dimension and sizing of sensor
 
--    |/|/|/|/|/|_| 85%
 
-- ROS Node
+*ROS Node*
 
--    |___________| 0%
+
+-    |/|/|/|/|/|/|__| 80%
+
+
+*Notes*
+
+- Python 3 can not be utilized correctly in this phase due to TF pkg limitation.
+- Pressure and noise sensors are not integrated in RViz
+- Noise sensor only works over bluetooth
