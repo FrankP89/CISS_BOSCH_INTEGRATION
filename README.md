@@ -1,4 +1,4 @@
-# CISS_BOSCH_PORT_PYTHON3
+# CISS_BOSCH_PORT_PYTHON
 
 Frank Pintor
 
@@ -10,10 +10,10 @@ Allows the utilization of the CISS BOSCH sensor in environments using Python 2 a
 
 *Future work*
 
-- Data streaming with industrial protocol
+
 
 -    |/|/|/|/|/|_| 85%
 
 - ROS Node
 
--    |___________| 0%
+-    |/|/|/|/|/|_| 85%
