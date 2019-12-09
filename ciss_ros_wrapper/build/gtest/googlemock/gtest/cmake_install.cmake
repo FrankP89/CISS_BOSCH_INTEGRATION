@@ -2,7 +2,7 @@
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/install")
+  set(CMAKE_INSTALL_PREFIX "/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

@@ -1,8 +1,8 @@
-prefix=/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/install
+prefix=/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/install
 
 Name: ciss_imu
 Description: Description of ciss_imu
 Version: 0.0.0
 Cflags: 
-Libs: -L/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/install/lib 
+Libs: -L/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/install/lib 
 Requires: 

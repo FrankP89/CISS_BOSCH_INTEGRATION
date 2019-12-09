@@ -322,11 +322,19 @@ def conv_data(data):
     return a
 
 
+def normalize_magnetometer(val, min_val, max_val):
+    val_between_0_and_1 = float((val - min_val) / (abs(min_val) + abs(max_val)))
+    val_between_minus_1_and_1 = (val_between_0_and_1 * 2.0) - 1.0
+    return val_between_minus_1_and_1
+
+def fix_magnetometer(val):
+    return normalize_accelerometer(val, -80.0, 80.0)
+
+
 def normalize_accelerometer(val, min_val, max_val):
     val_between_0_and_1 = (val - min_val) / (abs(min_val) + abs(max_val))
     val_between_minus_1_and_1 = (val_between_0_and_1 * 2.0) - 1.0
     return val_between_minus_1_and_1
-
 
 def fix_accelerometer(val):
     return normalize_accelerometer(val, MIN_VAL, MAX_VAL)
@@ -335,25 +343,32 @@ def fix_accelerometer(val):
 def frame_conversion(p,q,r,message):
     quat = Quaternion()
     quat_fixed = Quaternion()
-    if (message == 'magnetometer'):
-        if not p == '':        
-	    p_ = float(p)/60*180
-            if (p_ > 180):
-                p = 180    
-            if (p_ < -180):
-                p = -180            
-            p_ = math.radians(p_)
     
+
+    if (message == 'magnetometer'):
+        p_ = fix_magnetometer(p)
+        q_ = fix_magnetometer(q)
+        r_ = fix_magnetometer(r)
+        radius = math.sqrt(math.pow(p,2)+math.pow(q,2)+math.pow(r,2))
+        if (q_ >= 0):
+            r_ = r_*-1
+            r = r*-1
+        yaw_ = math.atan2(r_,-p_)
+        pitch_ = -1*math.atan2(math.sqrt(r_ * r_ + p_ * p_), q_ + 3.141592);
+        print("Magnetometer Yaw: ",yaw_*180.0/3.141592)
+        print("Magnetometer Pitch: ",pitch_*180.0/3.141592)
+        #print("x: ", radius*math.sin(pitch_) * math.cos(yaw_))
+        #print("y: ", radius*math.sin(pitch_) * math.sin(yaw_))
+        #print("z: ", radius*math.cos(pitch_))
+            
         if not p == '' and not q == '' and not r == '':
-            quat = tf.transformations.quaternion_from_euler(0,0,p_) 
+            quat = tf.transformations.quaternion_from_euler(0,pitch_,yaw_) 
 
     if (message == 'gyro'):
         if not p == '':        
 	    p_ = float(p) 
-
         if not q == '':
-            q_ = float(q)             
-            
+            q_ = float(q)      
         if not r == '':
             r_ = float(r)            
                 

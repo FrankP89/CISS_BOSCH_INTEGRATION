@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src
+CMAKE_SOURCE_DIR = /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build
+CMAKE_BINARY_DIR = /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build
 
 # Utility rule file for doxygen.
 
@@ -67,6 +67,6 @@ CMakeFiles/doxygen.dir/clean:
 .PHONY : CMakeFiles/doxygen.dir/clean
 
 CMakeFiles/doxygen.dir/depend:
-	cd /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build/CMakeFiles/doxygen.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build/CMakeFiles/doxygen.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/doxygen.dir/depend
 

@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src
+CMAKE_SOURCE_DIR = /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build
+CMAKE_BINARY_DIR = /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build
 
 # Utility rule file for _run_tests_ciss_imu.
 
@@ -63,10 +63,10 @@ ciss_imu/CMakeFiles/_run_tests_ciss_imu.dir/build: _run_tests_ciss_imu
 .PHONY : ciss_imu/CMakeFiles/_run_tests_ciss_imu.dir/build
 
 ciss_imu/CMakeFiles/_run_tests_ciss_imu.dir/clean:
-	cd /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build/ciss_imu && $(CMAKE_COMMAND) -P CMakeFiles/_run_tests_ciss_imu.dir/cmake_clean.cmake
+	cd /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build/ciss_imu && $(CMAKE_COMMAND) -P CMakeFiles/_run_tests_ciss_imu.dir/cmake_clean.cmake
 .PHONY : ciss_imu/CMakeFiles/_run_tests_ciss_imu.dir/clean
 
 ciss_imu/CMakeFiles/_run_tests_ciss_imu.dir/depend:
-	cd /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src/ciss_imu /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build/ciss_imu /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build/ciss_imu/CMakeFiles/_run_tests_ciss_imu.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src/ciss_imu /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build/ciss_imu /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build/ciss_imu/CMakeFiles/_run_tests_ciss_imu.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : ciss_imu/CMakeFiles/_run_tests_ciss_imu.dir/depend
 

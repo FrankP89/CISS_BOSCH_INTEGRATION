@@ -1,8 +1,8 @@
-# Install script for directory: /home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src/ciss_imu
+# Install script for directory: /home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src/ciss_imu
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/install")
+  set(CMAKE_INSTALL_PREFIX "/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,27 +38,27 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build/ciss_imu/catkin_generated/installspace/ciss_imu.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build/ciss_imu/catkin_generated/installspace/ciss_imu.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ciss_imu/cmake" TYPE FILE FILES
-    "/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build/ciss_imu/catkin_generated/installspace/ciss_imuConfig.cmake"
-    "/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build/ciss_imu/catkin_generated/installspace/ciss_imuConfig-version.cmake"
+    "/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build/ciss_imu/catkin_generated/installspace/ciss_imuConfig.cmake"
+    "/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build/ciss_imu/catkin_generated/installspace/ciss_imuConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ciss_imu" TYPE FILE FILES "/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src/ciss_imu/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ciss_imu" TYPE FILE FILES "/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src/ciss_imu/package.xml")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ciss_imu" TYPE DIRECTORY FILES
-    "/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src/ciss_imu/config"
-    "/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src/ciss_imu/meshes"
-    "/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src/ciss_imu/launch"
-    "/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src/ciss_imu/rviz"
-    "/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/src/ciss_imu/urdf"
+    "/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src/ciss_imu/config"
+    "/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src/ciss_imu/meshes"
+    "/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src/ciss_imu/launch"
+    "/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src/ciss_imu/rviz"
+    "/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src/ciss_imu/urdf"
     )
 endif()
 

@@ -7,6 +7,7 @@
 # new environment variables
 
 # modified environment variables
-export LD_LIBRARY_PATH="/opt/ros/melodic/lib"
-export PKG_CONFIG_PATH="/opt/ros/melodic/lib/pkgconfig"
-export PWD="/home/frank/Documents/ws_sensor_bosch/ciss_ros_wrapper/build"
+export CMAKE_PREFIX_PATH="/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/devel:$CMAKE_PREFIX_PATH"
+export PWD="/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/build"
+export ROSLISP_PACKAGE_DIRECTORIES="/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/devel/share/common-lisp"
+export ROS_PACKAGE_PATH="/home/frank/Documents/ws_sensor_bosch/CISS_BOSCH_INTEGRATION/ciss_ros_wrapper/src:$ROS_PACKAGE_PATH"
