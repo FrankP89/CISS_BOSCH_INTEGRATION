@@ -78,10 +78,13 @@
 #
 
 import serial, signal, configparser, os, csv, time, sys
+from loguru import logger
+import struct
+import logging
  
 #dataFileLocation = 'dataStream.csv'
 dataFileLocationEvent = 'detectedEvents.csv'
-iniFileLocation = 'sensor.ini'
+iniFileLocation = 'sensor_linux.ini'
 printInformation = True
 printInformation_Conf = True
 
@@ -91,6 +94,16 @@ sensor_id_glbl = "CISS_1_244B2207551B8950"
 scriptPath = os.path.dirname(os.path.abspath(sys.argv[0]))
 if not os.path.exists(scriptPath + "/data"):
     os.makedirs(scriptPath + "/data")
+
+# To track the current frame (accumulate partial data)
+current_frame = {
+    "id": None,
+    "timestamp": None,
+    "ax": None, "ay": None, "az": None,
+    "gx": None, "gy": None, "gz": None,
+    "mx": None, "my": None, "mz": None,
+    "t": None, "p": None, "h": None, "l": None, "n": None
+}
 
 # helper for signed 16bit conversion
 def s16(value):
@@ -245,6 +258,14 @@ def parse_event_detection(data):
 
     return []
 
+
+# Custom log handler to overwrite the current line
+class InPlaceLoggingHandler(logging.Handler):
+    def emit(self, record):
+        log_message = self.format(record)
+        sys.stdout.write('\r' + log_message)  # Overwrite the current line
+        sys.stdout.flush()  # Immediately flush the output to the terminal
+
 # Very simple class as a container for eache sensor with its id in the payload stream data_idx
 # and the corresponding length of the subsequent data (e.g. 6 bytes for 2b xyz-vector)
 class Sensor:
@@ -289,19 +310,26 @@ class StreamingConfig:
         self.enable(ser, False)
 
     def configure(self, ser, flgSetSamplingRateOnly):
-        if ((self.streaming_enabled or flgSetSamplingRateOnly) and self.streaming_period>0):
-            if printInformation_Conf: print(("configure period:",self.streaming_period))
-                       
+        if ((self.streaming_enabled or flgSetSamplingRateOnly) and self.streaming_period > 0):
+            if printInformation_Conf:
+                print(("configure period:", self.streaming_period))
+            
             conf_buff = bytearray([0xfe, self.cfg_length])
             conf_buff.append(self.cfg_id)
-            conf_buff.append(2)
-            k=0
-            while ((len(conf_buff)-2) < self.cfg_length):
-                conf_buff.append(self.streaming_period >> (k*8) & 0xff)
-                k+=1
+            conf_buff.append(2)  # Assuming 2 means "set sampling period"
+
+            # Now pack the streaming period properly
+            # Assume sensor expects it as 4 bytes (unsigned int or float depending on documentation)
+            
+            # If streaming_period is an int
+            conf_buff.extend(struct.pack('<I', int(self.streaming_period)))
+
+            # If streaming_period is a float, use this instead:
+            # conf_buff.extend(struct.pack('<f', self.streaming_period))
 
             write_conf(ser, conf_buff)
-        if (self.streaming_enabled and (self.streaming_period>0) and (flgSetSamplingRateOnly==0)):  
+
+        if (self.streaming_enabled and (self.streaming_period > 0) and (flgSetSamplingRateOnly == 0)):
             self.enable(ser)
         
     
@@ -347,7 +375,13 @@ class EventConfig:
                     for j in range(self.cfg_length[i]):
                        conf_buff.append((int(self.event_threshold[i]) >> (j*8)) & 0xff)
                 write_conf(ser, conf_buff)
- 
+
+
+## Functions that help visualize
+def log_inplace(message):
+    # sys.stdout.write('\r' + message)
+    logger.info(message)
+    sys.stdout.flush()
 
 
 def check_payload(payload):
@@ -372,33 +406,78 @@ def getTimeStringForNewFile():
     return time.strftime("%Y %m %d Time %H-%M ", time.localtime())
 
 
-# simple helper to write sensor data to a csv file
 def write_to_csv(id, buff, tstamp):
-    dataFileLocation = "./data/" + getTimeStringForNewFile() + 'dataStream.csv'
+    # Debugging: Log the incoming data
+    # logger.debug(f"Received data: {id}, {buff}, {tstamp}")
+    
+    # Check if the buffer contains data
+    # logger.debug(f"Sensor buffer length {len(buff)}")
     if len(buff) < 14:
+        logger.error("Buffer is too short to write to CSV.")
         return
-    try:
-        if not os.path.exists(dataFileLocation):
-            with open(dataFileLocation, "wb") as csvOpen:
+    
+    global current_frame
+    
+    # Fill the frame with the data from buff
+    field_names = ["id", "timestamp", "ax", "ay", "az", "gx", "gy", "gz", 
+                   "mx", "my", "mz", "t", "p", "h", "l", "n"]
+
+    # Update the current frame with non-empty fields from buff
+    if current_frame["id"] is None:
+        current_frame["id"] = id  # Set the 'id' field if it's not already set
+    
+    # Always update the timestamp
+    current_frame["timestamp"] = tstamp  # Always update with the latest timestamp
+
+    # Update other fields from buff (ignore empty values)
+    for idx, value in enumerate(buff):
+        if value != '' and value is not None:
+            current_frame[field_names[idx + 2]] = value  # Offset by 2 for 'id' and 'timestamp'
+            # logger.debug(f"Updated field '{field_names[idx + 2]}' with value: {value}")
+    
+    # Debugging: Check if all fields are filled
+    log_inplace(f"Current frame after update: {current_frame}")
+
+    # If all fields are filled (this indicates a complete frame), write it to CSV
+    if all(v is not None for v in current_frame.values()):
+        # Build the row for CSV
+        row = [current_frame[field] for field in field_names]
+        
+        # Prepare the file location
+        dataFileLocation = "./data/" + getTimeStringForNewFile() + 'dataStream.csv'
+
+        # Debugging: Check file location
+        logger.debug(f"Writing data to file: {dataFileLocation}")
+        
+        # Write data to CSV
+        try:
+            if not os.path.exists(dataFileLocation):
+                with open(dataFileLocation, "wb") as csvOpen:
+                    csvobj = csv.writer(csvOpen, dialect='excel')
+                    csvobj.writerow(field_names)  # Write header
+
+            with open(dataFileLocation, "a") as csvOpen:
                 csvobj = csv.writer(csvOpen, dialect='excel')
-                csvobj.writerow([" id ", " timestamp ", " ax ", " ay ", " az ",
-                                 " gx ", " gy ", " gz ", " mx ", " my ", " mz ",
-                                 " t ", " p ", " h ", " l ", " n "])
+                csvobj.writerow(row)  # Write the data row
 
-        with open(dataFileLocation, "a") as csvOpen:
-            csvobj = csv.writer(csvOpen, dialect='excel')
-            csvobj.writerow([id, tstamp, buff[0], buff[1], buff[2], buff[3], buff[4], buff[5], buff[6],buff[7], buff[8], buff[9], buff[10], buff[11], buff[12], buff[13]])
-            if printInformation: print((id, tstamp, buff[0], buff[1], buff[2], buff[3], buff[4], buff[5],buff[6], buff[7], buff[8], buff[9], buff[10], buff[11], buff[12], buff[13]))
+            if printInformation:
+                logger.info(f"Written: {row}")
 
-    except Exception as e:  # Checking that the "bytes-like object, not str" exception is not raised randomly
-        print("Some data lost...");
-        node.stream()
+        except Exception as e:
+            logger.error(f"Some data lost... {e}")
+            node.stream()
 
-    except KeyboardInterrupt as e:
-        if printInformation: print("User stopped")
-        node.disconnect()
-        time.sleep(1)
-        exit(0)
+        except KeyboardInterrupt as e:
+            if printInformation: logger.error("User stopped")
+            node.disconnect()
+            time.sleep(1)
+            exit(0)
+
+        # Reset current_frame for the next set of data
+        current_frame = {key: None for key in current_frame}
+    else:
+        pass
+        # logger.debug("Frame is not complete yet. Waiting for more data...")
 
 def write_to_csv_event(id, event, tstamp):
     global dataFileLocationEvent
@@ -458,7 +537,7 @@ class CISSNode:
         # read valus from ini file
         self.get_ini_config()
         
-        # connect to COM port
+        # connect to COM/TTY port
         self.connect()
         
         self.checkEventEnabled()
@@ -677,7 +756,8 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         if printInformation: print("Disconnected")
-        node.disconnect()
+        try: node.disconnect() 
+        except: pass
         time.sleep(1)
         exit(0)
 
