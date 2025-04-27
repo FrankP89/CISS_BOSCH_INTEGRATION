@@ -1,2 +1,4 @@
 bosch_env/*
 data/*
+src/bosch_env/*
+src/data/*

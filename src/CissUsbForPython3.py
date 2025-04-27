@@ -84,7 +84,7 @@ import logging
  
 #dataFileLocation = 'dataStream.csv'
 dataFileLocationEvent = 'detectedEvents.csv'
-iniFileLocation = 'sensor_linux.ini'
+iniFileLocation = 'src/sensor_linux.ini'
 printInformation = True
 printInformation_Conf = True
 
