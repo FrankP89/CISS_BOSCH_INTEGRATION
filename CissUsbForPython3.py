@@ -436,7 +436,7 @@ def write_to_csv(id, buff, tstamp):
             # logger.debug(f"Updated field '{field_names[idx + 2]}' with value: {value}")
     
     # Debugging: Check if all fields are filled
-    log_inplace(f"Current frame after update: {current_frame}")
+    log_inplace(f"Sensor Data: {current_frame}")
 
     # If all fields are filled (this indicates a complete frame), write it to CSV
     if all(v is not None for v in current_frame.values()):
