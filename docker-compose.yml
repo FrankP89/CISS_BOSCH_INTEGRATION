@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg17
+    container_name: timescaledb
+    env_file:
+      - .env  # Load .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5434:5432"  
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    networks:
+      - timescale_network
+    restart: always
+
+  bosch-sensor:
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    container_name: bosch-sensor
+    env_file:
+      - .env  # Reference to the .env file
+    depends_on:
+      - timescaledb
+    networks:
+      - timescale_network
+    volumes:
+      - ./:/app
+    working_dir: /app
+    devices:
+      - "/dev/ttyACM0:/dev/ttyACM0"  # Mount the host's /dev/ttyACM0 device into the container
+
+networks:
+  timescale_network:
+    driver: bridge
+
+volumes:
+  timescale_data:

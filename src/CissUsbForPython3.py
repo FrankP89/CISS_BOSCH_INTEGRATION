@@ -78,9 +78,27 @@
 #
 
 import serial, signal, configparser, os, csv, time, sys
+from datetime import datetime, timezone
 from loguru import logger
 import struct
 import logging
+import psycopg2
+
+# Read the .env file that is one level up from the current script
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+
+
+# Get database connection info from environment variables
+POSTGRES_HOST = os.getenv('POSTGRES_HOST')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+POSTGRES_USER = os.getenv('POSTGRES_USER')
+POSTGRES_DB = os.getenv('POSTGRES_DB')
+POSTGRES_PORT = os.getenv('POSTGRES_PORT')
+
+DATABASE_URL = f"postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:{POSTGRES_PORT}/{POSTGRES_DB}"
+
+# logger.info(f"Postgres password: {POSTGRES_PASSWORD}, user: {POSTGRES_USER}, db: {POSTGRES_DB}, port: {POSTGRES_PORT}")
  
 #dataFileLocation = 'dataStream.csv'
 dataFileLocationEvent = 'detectedEvents.csv'
@@ -94,6 +112,9 @@ sensor_id_glbl = "CISS_1_244B2207551B8950"
 scriptPath = os.path.dirname(os.path.abspath(sys.argv[0]))
 if not os.path.exists(scriptPath + "/data"):
     os.makedirs(scriptPath + "/data")
+
+logger.debug(f"Current folder: {scriptPath}")
+logger.info(f"Starting CISS Sensor Node with ID: {sensor_id_glbl}")
 
 # To track the current frame (accumulate partial data)
 current_frame = {
@@ -259,6 +280,61 @@ def parse_event_detection(data):
     return []
 
 
+
+class TimeScaleDB:
+    def __init__(self, db_url):
+        self.db_url = db_url
+        # Initialize your database connection here
+        # self.connection = ...
+
+    def connect(retries=5, delay=3):
+        """Connect to the TimescaleDB database with retry logic."""
+        
+        for attempt in range(5):
+            logger.info(f"Attempt {attempt + 1} to connect to TimescaleDB...")
+            try:
+
+                logger.debug(f"Port: {os.getenv('POSTGRES_PORT')}")
+                connection = psycopg2.connect(     
+                    host=POSTGRES_HOST,               
+                    port=POSTGRES_PORT,
+                    database=POSTGRES_DB,
+                    user=POSTGRES_USER,
+                    password=POSTGRES_PASSWORD,
+                )
+                print("✅ Connected to TimescaleDB!")
+                return connection
+            except psycopg2.OperationalError as e:
+                logger.error(f"⚠️  Connection failed: {e}")
+                logger.error(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            except Exception as e:
+                logger.error(f"⚠️  An unexpected error occurred: {e}")
+                logger.error(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+        raise Exception("❌ Could not connect to the database after several attempts.")
+    
+    def disconnect(connection, cursor):
+        """Safely disconnect from the database."""
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+        print("✅ Disconnected from TimescaleDB.")
+
+    def execute(self, query, params=None):
+        """Execute a query and commit."""
+        self.cursor.execute(query, params)
+        self.connection.commit()
+
+    def fetchone(self):
+        return self.cursor.fetchone()
+
+    def fetchall(self):
+        return self.cursor.fetchall()
+
+
+
 # Custom log handler to overwrite the current line
 class InPlaceLoggingHandler(logging.Handler):
     def emit(self, record):
@@ -383,6 +459,37 @@ def log_inplace(message):
     logger.info(message)
     sys.stdout.flush()
 
+def save_to_db(data, cursor, connection):
+    '''
+    Save the data to the database.
+    ''' 
+    # Convert timestamp
+    ts_seconds = data['timestamp'] / 1000.0
+    timestamp = datetime.fromtimestamp(ts_seconds, tz=timezone.utc)
+
+    # Insert into database
+    cursor.execute("""
+        INSERT INTO sensor_data (sensor_id, timestamp, ax, ay, az, gx, gy, gz, mx, my, mz, t, p, h, l, n)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+    """, (
+        data['id'],
+        timestamp,
+        data['ax'],
+        data['ay'],
+        data['az'],
+        data['gx'],
+        data['gy'],
+        data['gz'],
+        data['mx'],
+        data['my'],
+        data['mz'],
+        data['t'],
+        data['p'],
+        data['h'],
+        data['l'],
+        data['n']
+    ))
+    connection.commit()
 
 def check_payload(payload):
     eval = 0
@@ -406,7 +513,7 @@ def getTimeStringForNewFile():
     return time.strftime("%Y %m %d Time %H-%M ", time.localtime())
 
 
-def write_to_csv(id, buff, tstamp):
+def write_to_csv(id, buff, tstamp, cursor, connection):
     # Debugging: Log the incoming data
     # logger.debug(f"Received data: {id}, {buff}, {tstamp}")
     
@@ -437,6 +544,9 @@ def write_to_csv(id, buff, tstamp):
     
     # Debugging: Check if all fields are filled
     log_inplace(f"Sensor Data: {current_frame}")
+
+    # Store in DB if DB is available
+    save_to_db(current_frame, cursor, connection)
 
     # If all fields are filled (this indicates a complete frame), write it to CSV
     if all(v is not None for v in current_frame.values()):
@@ -547,6 +657,8 @@ class CISSNode:
         # configure the sensors as given in the sensor.ini file  
         self.config_sensors()
 
+        logger.debug(f"Finished initialization of CISS Node with ID: {self.sensorid}")
+
     def get_ini_config(self):
         global sensor_id_glbl
         global iniFileLocation
@@ -627,7 +739,82 @@ class CISSNode:
             if elem.event_enabled == 1:
                 self.flgEventEnabled = 1
 
-    def disconnect(self):
+    def connect_to_db(self, connection):
+        try:
+            cursor = connection.cursor()
+            logger.debug(f"Cursor created: {cursor}")
+        except Exception as e:
+            logger.error(f"Error creating cursor: {e}")
+            return None
+
+        logger.debug("Connected to TimescaleDB")
+
+        try:
+            # Check if the table exists
+            cursor.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'sensor_data'
+                );
+            """)
+            table_exists = cursor.fetchone()[0]
+
+            if not table_exists:
+                # Table does not exist, create it
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS sensor_data (
+                        internal_id SERIAL,                  -- Auto increment ID
+                        sensor_id TEXT NOT NULL,              -- Your "id" field
+                        timestamp TIMESTAMPTZ NOT NULL,       -- Timestamp of the reading
+                        ax INTEGER,
+                        ay INTEGER,
+                        az INTEGER,
+                        gx INTEGER,
+                        gy INTEGER,
+                        gz INTEGER,
+                        mx INTEGER,
+                        my INTEGER,
+                        mz INTEGER,
+                        t DOUBLE PRECISION,
+                        p DOUBLE PRECISION,
+                        h DOUBLE PRECISION,
+                        l DOUBLE PRECISION,
+                        n DOUBLE PRECISION,
+                        PRIMARY KEY (internal_id, timestamp) -- Composite key to include timestamp
+                    );
+                """)
+                logger.info("Table 'sensor_data' created.")
+            
+            # Check if it's already a hypertable
+            cursor.execute("""
+                SELECT 1 FROM timescaledb_information.hypertables WHERE hypertable_name = 'sensor_data';
+            """)
+            result = cursor.fetchone()
+
+            if not result:
+                # If it's not a hypertable, create it
+                cursor.execute("""
+                    SELECT create_hypertable('sensor_data', 'timestamp');
+                """)
+                logger.info("Hypertable 'sensor_data' created.")
+            else:
+                logger.info("Table 'sensor_data' is already a hypertable.")
+
+            # Commit the changes
+            connection.commit()
+            return cursor
+
+        except Exception as e:
+            logger.error(f"Error while executing queries: {e}")
+            connection.rollback()
+            return None
+
+
+    def disconnect(self, connection=None, cursor=None):
+        # Closes the database connection from TimescaleDB Class
+        if connection:
+            connection = connection.disconnect(connection, cursor)
+        # Close the serial port
         self.disable_sensors()
         self.ser.close()
 
@@ -666,7 +853,7 @@ class CISSNode:
                 a = i
         return a
 
-    def parse_payload(self, payload):
+    def parse_payload(self, payload, cursor, connection):
         payload.pop(0)
         payload.pop(len(payload)-1)
         while len(payload) != 0:
@@ -674,12 +861,12 @@ class CISSNode:
             payload.pop(0)
             if t >= 0:
                     mask = self.sensorlist[t].parse(payload[0:self.sensorlist[t].data_length])
-                    write_to_csv(self.sensorid, mask, int(time.time()*1000))
+                    write_to_csv(self.sensorid, mask, int(time.time()*1000), cursor, connection)
                     payload = payload[self.sensorlist[t].data_length:]
             else:
                 break
 
-    def stream(self):
+    def stream(self, connection, cursor):
         global out
     
         sof = b"\xfe" # decode(encoding="ISO-8859-1") - Strange encoding method
@@ -689,6 +876,7 @@ class CISSNode:
         payload_found = 0
         payload = []
         sr = self.ser
+
         while payload_found != 1:
 
             while not out == sof:
@@ -705,7 +893,7 @@ class CISSNode:
             out = ""
             if check_payload(payload) == 1:
                 payload_found = 1
-                self.parse_payload(payload)
+                self.parse_payload(payload, cursor, connection)
 
     def config_sensors(self):
         # Configure range of acc if acc streaming or threshold detection is enabled
@@ -740,29 +928,45 @@ class CISSNode:
             self.eventlist["acc"].enable(self.ser)   #enabling of the event mode, therefore use "acc" instance, 
             
 
-def ctrl_c_handler(signal, frame,node):
+
+
+
+
+def ctrl_c_handler(signal, frame, node):
     raise Exception("")
+
 
 node = CISSNode()
 
-def main():
+def main(connection=None):
     signal.signal(signal.SIGINT, ctrl_c_handler)
+    logger.debug("Starting data stream...")
+
+    # Connect to the database
+    if connection: cursor = node.connect_to_db(connection=connection)
+
+    logger.debug("Starting data stream...")
     
     while 1:
-        node.stream()
+        node.stream(connection, cursor)
 
 if __name__ == "__main__":
     try:
-        main()
+        logger.debug(f"DB URL: {DATABASE_URL}")
+        tsdb = TimeScaleDB(db_url=DATABASE_URL)
+        
+        connection = tsdb.connect()
+        main(connection=connection)
     except Exception as e:
-        if printInformation: print("Disconnected")
-        try: node.disconnect() 
-        except: pass
+        if printInformation: logger.error(f"Disconnected: {e}")
+        try: node.disconnect(connection) 
+        except: node.disconnect()
         time.sleep(1)
         exit(0)
 
     except KeyboardInterrupt as e:
-        if printInformation: print("User stopped")
-        node.disconnect()
+        if printInformation: logger.debug("User stopped process with Ctrl+C")
+        try: node.disconnect(connection)
+        except: node.disconnect()
         time.sleep(1)
         exit(0)
