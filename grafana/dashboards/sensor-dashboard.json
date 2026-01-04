@@ -1,264 +1,277 @@
 {
-  "dashboard": {
-    "id": null,
-    "uid": "ciss-sensor-dashboard",
-    "title": "CISS Bosch Sensor Dashboard",
-    "tags": ["sensor", "bosch", "ciss"],
-    "timezone": "browser",
-    "schemaVersion": 38,
-    "version": 0,
-    "refresh": "5s",
-    "panels": [
-      {
-        "id": 1,
-        "title": "Acceleration (X, Y, Z)",
-        "type": "timeseries",
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
-        "targets": [
-          {
-            "datasource": {"type": "postgres", "uid": "timescaledb"},
-            "editorMode": "code",
-            "format": "table",
-            "rawQuery": true,
-            "rawSql": "SELECT timestamp AS time, ax, ay, az FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
-            "refId": "A",
-            "sql": {
-              "columns": [
-                {"parameters": [], "type": "function"},
-                {"parameters": [], "type": "column"}
-              ],
-              "groupBy": [{"property": {"type": "string"}, "type": "groupBy"}],
-              "limit": 50
-            }
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "color": {"mode": "palette-classic"},
-            "custom": {
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 10,
-              "gradientMode": "none",
-              "hideFrom": {"tooltip": false, "viz": false, "legend": false},
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {"type": "linear"},
-              "showPoints": "never",
-              "spanNulls": false,
-              "stacking": {"group": "A", "mode": "none"},
-              "thresholdsStyle": {"mode": "off"}
-            },
-            "mappings": [],
-            "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-            "unit": "short"
-          },
-          "overrides": [
-            {
-              "matcher": {"id": "byName", "options": "ax"},
-              "properties": [
-                {"id": "displayName", "value": "X-Axis"},
-                {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
-              ]
-            },
-            {
-              "matcher": {"id": "byName", "options": "ay"},
-              "properties": [
-                {"id": "displayName", "value": "Y-Axis"},
-                {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}
-              ]
-            },
-            {
-              "matcher": {"id": "byName", "options": "az"},
-              "properties": [
-                {"id": "displayName", "value": "Z-Axis"},
-                {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}
-              ]
-            }
-          ]
-        },
-        "options": {
-          "legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom"},
-          "tooltip": {"mode": "multi"}
+  "id": null,
+  "uid": "ciss-sensor-dashboard",
+  "title": "CISS Bosch Sensor Dashboard",
+  "tags": ["sensor", "bosch", "ciss"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 0,
+  "refresh": "5s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Acceleration (X, Y, Z)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [
+        {
+          "datasource": {"type": "postgres"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT timestamp AS time, ax, ay, az FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
+          "refId": "A"
         }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "ax"},
+            "properties": [
+              {"id": "displayName", "value": "X-Axis"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "ay"},
+            "properties": [
+              {"id": "displayName", "value": "Y-Axis"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "az"},
+            "properties": [
+              {"id": "displayName", "value": "Z-Axis"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}
+            ]
+          }
+        ]
       },
-      {
-        "id": 2,
-        "title": "Gyroscope (X, Y, Z)",
-        "type": "timeseries",
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
-        "targets": [
-          {
-            "datasource": {"type": "postgres", "uid": "timescaledb"},
-            "editorMode": "code",
-            "format": "table",
-            "rawQuery": true,
-            "rawSql": "SELECT timestamp AS time, gx, gy, gz FROM sensor_data WHERE $__timeFilter(timestamp) AND gx IS NOT NULL ORDER BY timestamp",
-            "refId": "A"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "color": {"mode": "palette-classic"},
-            "custom": {
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "drawStyle": "line",
-              "fillOpacity": 10,
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "showPoints": "never"
-            },
-            "mappings": [],
-            "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-            "unit": "short"
-          },
-          "overrides": [
-            {
-              "matcher": {"id": "byName", "options": "gx"},
-              "properties": [{"id": "displayName", "value": "X-Axis"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]
-            },
-            {
-              "matcher": {"id": "byName", "options": "gy"},
-              "properties": [{"id": "displayName", "value": "Y-Axis"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}]
-            },
-            {
-              "matcher": {"id": "byName", "options": "gz"},
-              "properties": [{"id": "displayName", "value": "Z-Axis"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}]
-            }
-          ]
-        },
-        "options": {
-          "legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom"},
-          "tooltip": {"mode": "multi"}
-        }
-      },
-      {
-        "id": 3,
-        "title": "Magnetometer (X, Y, Z)",
-        "type": "timeseries",
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
-        "targets": [
-          {
-            "datasource": {"type": "postgres", "uid": "timescaledb"},
-            "editorMode": "code",
-            "format": "table",
-            "rawQuery": true,
-            "rawSql": "SELECT timestamp AS time, mx, my, mz FROM sensor_data WHERE $__timeFilter(timestamp) AND mx IS NOT NULL ORDER BY timestamp",
-            "refId": "A"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "color": {"mode": "palette-classic"},
-            "custom": {
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "drawStyle": "line",
-              "fillOpacity": 10,
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "showPoints": "never"
-            },
-            "mappings": [],
-            "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-            "unit": "short"
-          },
-          "overrides": [
-            {
-              "matcher": {"id": "byName", "options": "mx"},
-              "properties": [{"id": "displayName", "value": "X-Axis"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]
-            },
-            {
-              "matcher": {"id": "byName", "options": "my"},
-              "properties": [{"id": "displayName", "value": "Y-Axis"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}]
-            },
-            {
-              "matcher": {"id": "byName", "options": "mz"},
-              "properties": [{"id": "displayName", "value": "Z-Axis"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}]
-            }
-          ]
-        },
-        "options": {
-          "legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom"},
-          "tooltip": {"mode": "multi"}
-        }
-      },
-      {
-        "id": 4,
-        "title": "Environmental Data",
-        "type": "timeseries",
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
-        "targets": [
-          {
-            "datasource": {"type": "postgres", "uid": "timescaledb"},
-            "editorMode": "code",
-            "format": "table",
-            "rawQuery": true,
-            "rawSql": "SELECT timestamp AS time, t AS temperature, p AS pressure, h AS humidity, l AS light FROM sensor_data WHERE $__timeFilter(timestamp) AND t IS NOT NULL ORDER BY timestamp",
-            "refId": "A"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "color": {"mode": "palette-classic"},
-            "custom": {
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "drawStyle": "line",
-              "fillOpacity": 10,
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "showPoints": "never"
-            },
-            "mappings": [],
-            "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-            "unit": "short"
-          },
-          "overrides": [
-            {
-              "matcher": {"id": "byName", "options": "temperature"},
-              "properties": [{"id": "displayName", "value": "Temperature (°C)"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]
-            },
-            {
-              "matcher": {"id": "byName", "options": "pressure"},
-              "properties": [{"id": "displayName", "value": "Pressure (hPa)"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}]
-            },
-            {
-              "matcher": {"id": "byName", "options": "humidity"},
-              "properties": [{"id": "displayName", "value": "Humidity (%)"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}]
-            },
-            {
-              "matcher": {"id": "byName", "options": "light"},
-              "properties": [{"id": "displayName", "value": "Light"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "yellow"}}]
-            }
-          ]
-        },
-        "options": {
-          "legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom"},
-          "tooltip": {"mode": "multi"}
-        }
+      "options": {
+        "legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom"},
+        "tooltip": {"mode": "multi"}
       }
-    ],
-    "time": {
-      "from": "now-1h",
-      "to": "now"
     },
-    "timepicker": {},
-    "templating": {"list": []},
-    "annotations": {"list": []},
-    "editable": true,
-    "fiscalYearStartMonth": 0,
-    "graphTooltip": 0,
-    "links": [],
-    "liveNow": false,
-    "weekStart": ""
-  }
+    {
+      "id": 2,
+      "title": "Gyroscope (X, Y, Z)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {
+          "datasource": {"type": "postgres"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT timestamp AS time, gx, gy, gz FROM sensor_data WHERE $__timeFilter(timestamp) AND gx IS NOT NULL ORDER BY timestamp",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "gx"},
+            "properties": [
+              {"id": "displayName", "value": "X-Axis"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "gy"},
+            "properties": [
+              {"id": "displayName", "value": "Y-Axis"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "gz"},
+            "properties": [
+              {"id": "displayName", "value": "Z-Axis"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom"},
+        "tooltip": {"mode": "multi"}
+      }
+    },
+    {
+      "id": 3,
+      "title": "Magnetometer (X, Y, Z)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [
+        {
+          "datasource": {"type": "postgres"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT timestamp AS time, mx, my, mz FROM sensor_data WHERE $__timeFilter(timestamp) AND mx IS NOT NULL ORDER BY timestamp",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "mx"},
+            "properties": [
+              {"id": "displayName", "value": "X-Axis"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "my"},
+            "properties": [
+              {"id": "displayName", "value": "Y-Axis"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "mz"},
+            "properties": [
+              {"id": "displayName", "value": "Z-Axis"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom"},
+        "tooltip": {"mode": "multi"}
+      }
+    },
+    {
+      "id": 4,
+      "title": "Environmental Data",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [
+        {
+          "datasource": {"type": "postgres"},
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT timestamp AS time, t AS temperature, p AS pressure, h AS humidity, l AS light FROM sensor_data WHERE $__timeFilter(timestamp) AND t IS NOT NULL ORDER BY timestamp",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "temperature"},
+            "properties": [
+              {"id": "displayName", "value": "Temperature (°C)"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "pressure"},
+            "properties": [
+              {"id": "displayName", "value": "Pressure (hPa)"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "humidity"},
+            "properties": [
+              {"id": "displayName", "value": "Humidity (%)"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "light"},
+            "properties": [
+              {"id": "displayName", "value": "Light"},
+              {"id": "color", "value": {"mode": "fixed", "fixedColor": "yellow"}}
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {"calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom"},
+        "tooltip": {"mode": "multi"}
+      }
+    }
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "templating": {"list": []},
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "weekStart": ""
 }
-
