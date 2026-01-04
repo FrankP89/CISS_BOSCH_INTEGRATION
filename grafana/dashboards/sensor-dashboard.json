@@ -81,7 +81,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT timestamp AS time, gx, gy, gz FROM sensor_data WHERE $__timeFilter(timestamp) AND gx IS NOT NULL ORDER BY timestamp",
+          "rawSql": "SELECT timestamp AS time, gx, gy, gz FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
           "refId": "A"
         }
       ],
@@ -142,7 +142,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT timestamp AS time, mx, my, mz FROM sensor_data WHERE $__timeFilter(timestamp) AND mx IS NOT NULL ORDER BY timestamp",
+          "rawSql": "SELECT timestamp AS time, mx, my, mz FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
           "refId": "A"
         }
       ],
@@ -203,7 +203,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT timestamp AS time, t AS temperature, p AS pressure, h AS humidity, l AS light FROM sensor_data WHERE $__timeFilter(timestamp) AND t IS NOT NULL ORDER BY timestamp",
+          "rawSql": "SELECT timestamp AS time, t AS temperature, p AS pressure, h AS humidity, l AS light FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
           "refId": "A"
         }
       ],
