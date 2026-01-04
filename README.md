@@ -2,6 +2,9 @@
 
 Allows the utilization of the CISS BOSCH sensor in environments using and Python 3.
 
+## Dependencies
+
+This project uses [UV](https://github.com/astral-sh/uv) for fast Python package management. Dependencies are defined in `pyproject.toml`.
 
 ## Setup 
 ### Docker (Does not set up any timeseries DB)

@@ -4,9 +4,6 @@ FROM python:3.13-alpine
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
-
 # Update first
 RUN apk update \
     && apk upgrade \
@@ -17,11 +14,14 @@ RUN apk add --no-cache postgresql-dev gcc python3-dev musl-dev
 RUN apk update && \
     apk add --virtual build-deps
 
-RUN pip install psycopg2
-# Install any needed packages specified in requirements.txt
+# Install UV
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Install dependencies if there's a requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Set the default command to run your script
-CMD ["python", "src/CissUsbForPython3.py"]
+# Create virtual environment and install dependencies from requirements.txt using UV
+RUN uv venv && uv pip install -r requirements.txt
+
+# Set the default command to run your script using UV
+CMD ["uv", "run", "python", "src/CissUsbForPython3.py"]
