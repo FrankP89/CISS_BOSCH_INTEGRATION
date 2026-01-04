@@ -6,7 +6,7 @@
     "namespace": "default",
     "uid": "2TUbG9HuxQbYjoVphdS7Anv4W9UncUB8OWXP17XXcKkX",
     "resourceVersion": "3",
-    "generation": 20,
+    "generation": 21,
     "creationTimestamp": "2026-01-04T14:45:03Z",
     "labels": {
       "grafana.app/deprecatedInternalID": "4"
@@ -129,7 +129,7 @@
                       }
                     ]
                   },
-                  "unit": "short"
+                  "unit": "accG"
                 },
                 "overrides": [
                   {
