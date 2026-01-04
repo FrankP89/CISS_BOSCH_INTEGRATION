@@ -55,6 +55,8 @@ services:
       - grafana-datasources:/etc/grafana/provisioning/datasources
       - ./grafana/entrypoint.sh:/entrypoint.sh
     entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    networks:
+      - timescale_network
     depends_on:
       - timescaledb
 
