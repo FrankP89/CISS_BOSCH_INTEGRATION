@@ -35,9 +35,23 @@ services:
     devices:
       - "/dev/ttyACM0:/dev/ttyACM0"  # Mount the host's /dev/ttyACM0 device into the container
 
+  # Add Grafana service
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana_bosch
+    ports:
+      - "3888:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - timescaledb
+
 networks:
   timescale_network:
     driver: bridge
 
 volumes:
   timescale_data:
+  grafana-storage:
