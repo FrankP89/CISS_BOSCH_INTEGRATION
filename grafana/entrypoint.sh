@@ -3,6 +3,7 @@ set -e
 
 # Generate datasource config from environment variables if template exists
 if [ -f /etc/grafana/provisioning/datasources/datasource.yml.template ]; then
+  # Write directly to the datasources volume (writable)
   sed -e "s|\$POSTGRES_USER|${POSTGRES_USER}|g" \
       -e "s|\$POSTGRES_PASSWORD|${POSTGRES_PASSWORD}|g" \
       -e "s|\$POSTGRES_DB|${POSTGRES_DB}|g" \
