@@ -6,7 +6,7 @@
     "namespace": "default",
     "uid": "2TUbG9HuxQbYjoVphdS7Anv4W9UncUB8OWXP17XXcKkX",
     "resourceVersion": "3",
-    "generation": 21,
+    "generation": 27,
     "creationTimestamp": "2026-01-04T14:45:03Z",
     "labels": {
       "grafana.app/deprecatedInternalID": "4"
@@ -61,7 +61,24 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT timestamp AS time, ax, ay, az FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp"
+                        "rawSql": "SELECT timestamp AS time, ax, ay, az FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
                       },
                       "version": "v0"
                     },
@@ -1203,6 +1220,175 @@
             "version": "12.3.1"
           }
         }
+      },
+      "panel-9": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": true,
+                    "query": {
+                      "datasource": {
+                        "name": "ff95tzozxxdkwd"
+                      },
+                      "group": "grafana-postgresql-datasource",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "dataset": "PG_DB",
+                        "editorMode": "builder",
+                        "format": "table",
+                        "rawSql": "SELECT AVG(ax) AS \"x\", AVG(ay) AS \"y\", AVG(az) AS \"z\" FROM sensor_data LIMIT 50 ",
+                        "sql": {
+                          "columns": [
+                            {
+                              "alias": "\"x\"",
+                              "name": "AVG",
+                              "parameters": [
+                                {
+                                  "name": "ax",
+                                  "type": "functionParameter"
+                                }
+                              ],
+                              "type": "function"
+                            },
+                            {
+                              "alias": "\"y\"",
+                              "name": "AVG",
+                              "parameters": [
+                                {
+                                  "name": "ay",
+                                  "type": "functionParameter"
+                                }
+                              ],
+                              "type": "function"
+                            },
+                            {
+                              "alias": "\"z\"",
+                              "name": "AVG",
+                              "parameters": [
+                                {
+                                  "name": "az",
+                                  "type": "functionParameter"
+                                }
+                              ],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        },
+                        "table": "sensor_data"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "D"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "ff95tzozxxdkwd"
+                      },
+                      "group": "grafana-postgresql-datasource",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "dataset": "PG_DB",
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT timestamp AS time, ax, ay, az FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "A"
+                  }
+                }
+              ],
+              "queryOptions": {
+                "interval": "1s"
+              },
+              "transformations": []
+            }
+          },
+          "description": "",
+          "id": 9,
+          "links": [],
+          "title": "Acceleration",
+          "transparent": true,
+          "vizConfig": {
+            "group": "volkovlabs-echarts-panel",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+              },
+              "options": {
+                "baidu": {
+                  "callback": "bmapReady",
+                  "key": ""
+                },
+                "editor": {
+                  "format": "auto"
+                },
+                "editorMode": "code",
+                "gaode": {
+                  "key": "",
+                  "plugin": "AMap.Scale,AMap.ToolBar"
+                },
+                "getOption": "// Access the data frame safely using aliases 'x', 'y', and 'z'\nconst dataFrame = context.panel.data.series.find(s => s.fields && s.fields.length >= 3);\n\n// Helper function to safely get the LATEST value by name\nconst getValueByName = (frame, name) => {\n  const field = frame.fields.find(f => f.name === name);\n  if (field && field.values.length > 0) {\n    const lastIndex = field.values.length - 1;\n    return field.values.get(lastIndex);\n  }\n  return 0; // Default to 0 if a field is missing or has no values\n};\n\nif (dataFrame) {\n  // Get the current single values for x, y, and z\n  const x = getValueByName(dataFrame, 'ax');\n  const y = getValueByName(dataFrame, 'ay');\n  const z = getValueByName(dataFrame, 'az');\n\n  // Return the ECharts configuration to draw the vector\n  return {\n    grid3D: {\n      boxWidth: 150,\n      boxHeight: 150,\n      boxDepth: 150,\n      viewControl: {\n        // Lock the camera perspective on refresh\n        projection: 'perspective',\n        autoRotate: false,\n        alpha: 45,              // Set the vertical angle (adjust as needed)\n        beta: 45,               // Set the horizontal angle (adjust as needed)\n        distance: 250,          // Set the zoom level\n      }\n    },\n    xAxis3D: { name: 'X Axis', min: -1000, max: 1000 },\n    yAxis3D: { name: 'Y Axis', min: -1000, max: 1000 },\n    zAxis3D: { name: 'Z Axis', min: -1000, max: 1000 },\n    series: [\n      {\n        type: 'line3D',\n        data: [[0, 0, 0], [x, y, z]], // Explicitly starts from origin\n        lineStyle: { width: 2, color: '#ff0000' }\n      },\n      {\n        type: 'scatter3D',\n        symbol: 'arrow',\n        symbolSize: 20,\n        data: [[x, y, z]],\n        itemStyle: { color: '#ff0000' }\n      }\n    ]\n  };\n}\n\n// Return an empty object if data isn't ready yet\nreturn {};\n",
+                "google": {
+                  "callback": "gmapReady",
+                  "key": ""
+                },
+                "map": "none",
+                "renderer": "canvas",
+                "themeEditor": {
+                  "config": "{}",
+                  "name": "default"
+                },
+                "visualEditor": {
+                  "code": "return {\n  dataset: context.editor.dataset,\n  series: context.editor.series,\n  xAxis: {\n    type: 'time',\n  },\n  yAxis: {\n    type: 'value',\n    min: 'dataMin',\n  },\n}\n",
+                  "dataset": [],
+                  "series": []
+                }
+              }
+            },
+            "version": "7.2.2"
+          }
+        }
       }
     },
     "layout": {
@@ -1282,7 +1468,7 @@
                 "name": "panel-1"
               },
               "height": 8,
-              "width": 12,
+              "width": 18,
               "x": 0,
               "y": 14
             }
@@ -1292,11 +1478,11 @@
             "spec": {
               "element": {
                 "kind": "ElementReference",
-                "name": "panel-3"
+                "name": "panel-9"
               },
               "height": 8,
-              "width": 12,
-              "x": 12,
+              "width": 6,
+              "x": 18,
               "y": 14
             }
           },
@@ -1310,6 +1496,19 @@
               "height": 8,
               "width": 12,
               "x": 0,
+              "y": 22
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-3"
+              },
+              "height": 8,
+              "width": 12,
+              "x": 12,
               "y": 22
             }
           }
@@ -1327,6 +1526,7 @@
     "timeSettings": {
       "autoRefresh": "auto",
       "autoRefreshIntervals": [
+        "1s",
         "5s",
         "10s",
         "30s",
