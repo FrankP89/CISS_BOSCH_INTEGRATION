@@ -6,7 +6,7 @@
     "namespace": "default",
     "uid": "2TUbG9HuxQbYjoVphdS7Anv4W9UncUB8OWXP17XXcKkX",
     "resourceVersion": "3",
-    "generation": 13,
+    "generation": 20,
     "creationTimestamp": "2026-01-04T14:45:03Z",
     "labels": {
       "grafana.app/deprecatedInternalID": "4"
@@ -659,6 +659,10 @@
                           "fixedColor": "red",
                           "mode": "fixed"
                         }
+                      },
+                      {
+                        "id": "custom.lineInterpolation",
+                        "value": "smooth"
                       }
                     ]
                   },
@@ -726,7 +730,7 @@
                       "options": {
                         "mode": "exclude",
                         "names": [
-                          "Pressure (hPa)"
+                          "Temperature (°C)"
                         ],
                         "prefix": "All except:",
                         "readOnly": true
@@ -1006,14 +1010,14 @@
                         "dataset": "PG_DB",
                         "editorMode": "builder",
                         "format": "table",
-                        "rawSql": "SELECT AVG(t) FROM sensor_data LIMIT 50 ",
+                        "rawSql": "SELECT AVG(l) FROM sensor_data LIMIT 50 ",
                         "sql": {
                           "columns": [
                             {
                               "name": "AVG",
                               "parameters": [
                                 {
-                                  "name": "t",
+                                  "name": "l",
                                   "type": "functionParameter"
                                 }
                               ],
@@ -1313,7 +1317,7 @@
       }
     },
     "links": [],
-    "liveNow": false,
+    "liveNow": true,
     "preload": false,
     "tags": [
       "sensor",
@@ -1335,7 +1339,7 @@
         "1d"
       ],
       "fiscalYearStartMonth": 0,
-      "from": "now-30m",
+      "from": "now-2m",
       "hideTimepicker": false,
       "timezone": "browser",
       "to": "now"
