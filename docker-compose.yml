@@ -48,6 +48,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_PATHS_DATA=/var/lib/grafana
+      - GF_INSTALL_PLUGINS=grafana-business-charts
     volumes:
       - grafana-storage:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
