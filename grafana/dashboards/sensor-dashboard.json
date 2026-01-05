@@ -5,8 +5,8 @@
     "name": "ciss-sensor-dashboard",
     "namespace": "default",
     "uid": "2TUbG9HuxQbYjoVphdS7Anv4W9UncUB8OWXP17XXcKkX",
-    "resourceVersion": "3",
-    "generation": 27,
+    "resourceVersion": "27",
+    "generation": 31,
     "creationTimestamp": "2026-01-04T14:45:03Z",
     "labels": {
       "grafana.app/deprecatedInternalID": "4"
@@ -14,7 +14,7 @@
     "annotations": {
       "grafana.app/createdBy": "user:bf95kug18fh1cd",
       "grafana.app/updatedBy": "user:bf95kug18fh1cd",
-      "grafana.app/updatedTimestamp": "2026-01-04T14:47:04Z",
+      "grafana.app/updatedTimestamp": "2026-01-04T16:24:13Z",
       "grafana.app/saved-from-ui": "Grafana v12.3.1 (0d1a5b4420)"
     }
   },
@@ -588,7 +588,24 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT timestamp AS time, t AS temperature, p AS pressure, h AS humidity, l AS light FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp"
+                        "rawSql": "SELECT timestamp AS time, t AS temperature, p AS pressure, h AS humidity, l AS light FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
                       },
                       "version": "v0"
                     },
@@ -807,9 +824,10 @@
                       "kind": "DataQuery",
                       "spec": {
                         "dataset": "PG_DB",
-                        "editorMode": "builder",
+                        "editorMode": "code",
                         "format": "table",
-                        "rawSql": "SELECT AVG(t) FROM sensor_data LIMIT 50 ",
+                        "rawQuery": true,
+                        "rawSql": "SELECT timestamp AS time, t AS temperature FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
                         "sql": {
                           "columns": [
                             {
@@ -918,9 +936,10 @@
                       "kind": "DataQuery",
                       "spec": {
                         "dataset": "PG_DB",
-                        "editorMode": "builder",
+                        "editorMode": "code",
                         "format": "table",
-                        "rawSql": "SELECT AVG(h) FROM sensor_data LIMIT 50 ",
+                        "rawQuery": true,
+                        "rawSql": "SELECT timestamp AS time, h AS humidity FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
                         "sql": {
                           "columns": [
                             {
@@ -1025,9 +1044,10 @@
                       "kind": "DataQuery",
                       "spec": {
                         "dataset": "PG_DB",
-                        "editorMode": "builder",
+                        "editorMode": "code",
                         "format": "table",
-                        "rawSql": "SELECT AVG(l) FROM sensor_data LIMIT 50 ",
+                        "rawQuery": true,
+                        "rawSql": "SELECT timestamp AS time, l AS light FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
                         "sql": {
                           "columns": [
                             {
@@ -1131,9 +1151,10 @@
                       "kind": "DataQuery",
                       "spec": {
                         "dataset": "PG_DB",
-                        "editorMode": "builder",
+                        "editorMode": "code",
                         "format": "table",
-                        "rawSql": "SELECT AVG(p) FROM sensor_data LIMIT 50 ",
+                        "rawQuery": true,
+                        "rawSql": "SELECT timestamp AS time, p AS pressure FROM sensor_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
                         "sql": {
                           "columns": [
                             {
